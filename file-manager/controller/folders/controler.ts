@@ -56,12 +56,16 @@ export const create = async (req, res) => {
                 .json({ message: 'Имя не коректно', errors: errors })
         }
         const path = req.url.replace(`/${urlFolderRouter}`, '')
-        const isLife = await checkFolder(path.split('/'))
+        const pathArr = path.split('/')
+        const isLife = await checkFolder(pathArr)
         if (isLife) {
             return res.status(409).json({ message: 'Папка уже создана' })
         }
-        const result = await createFolder(path.split('/'))
-        return res.json(result)
+        await createFolder(pathArr)
+        return res.json({
+            type: 'folder',
+            name: pathArr[pathArr.length - 1],
+        })
     } catch (e) {
         console.log(e)
         res.status(404).json(e)
@@ -76,15 +80,19 @@ export const rename = async (req, res) => {
                 .json({ message: 'Папка не создан', errors: errors })
         }
         const path = req.url.replace(`/rename/${urlFolderRouter}`, '')
+        const pathArr = path.split('/')
         const { name } = req.body
-        const dir = path.split('/')
+        const dir = pathArr
         dir.pop()
         const isLife = await checkFolder([...dir, name])
         if (isLife) {
             return res.status(409).json({ message: 'Папка уже создана' })
         }
-        const result = await renameFolder(path.split('/'), [...dir, name])
-        return res.json(result)
+        await renameFolder(pathArr, [...dir, name])
+        return res.json({
+            type: 'folder',
+            name: pathArr[pathArr.length - 1],
+        })
     } catch (e) {
         console.log(e)
         res.status(404).json(e)
