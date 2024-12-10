@@ -8,10 +8,11 @@ import {
     renameFile,
 } from './model'
 import { validationResult } from 'express-validator'
+import transliterateRu from '../../helper/transliterate-ru'
 
 export const check = async (req, res) => {
     try {
-        const path = decodeURIComponent(req.url).replace(`/check/${urlFileRouter}/`, '')
+        const path = req.url.replace(`/check/${urlFileRouter}/`, '')
         const result = await checkFile(path.split('/'))
         return res.json(result)
     } catch (e) {
@@ -21,7 +22,8 @@ export const check = async (req, res) => {
 }
 export const find = async (req, res) => {
     try {
-        const path = decodeURIComponent(req.url).replace(`/${urlFileRouter}/`, '')
+        const path = req.url.replace(`/${urlFileRouter}/`, '')
+        console.log(transliterateRu(req.url.replace(`/${urlFileRouter}/`, '')));
         
         const pathArr = path.split('/')
         const result = await findFileContent(pathArr)
@@ -43,8 +45,7 @@ export const create = async (req, res) => {
                 .status(400)
                 .json({ message: 'Имя не коректно', errors: errors })
         }
-        const path = decodeURIComponent(req.url).replace(`/${urlFileRouter}/`, '')
-        
+        const path = req.url.replace(`/${urlFileRouter}/`, '')
         const pathArr = path.split('/')
         const isLife = await checkFile(pathArr)
         if (isLife) {
@@ -69,7 +70,7 @@ export const change = async (req, res) => {
                 .status(400)
                 .json({ message: 'Даные не коректны', errors: errors })
         }
-        const path = decodeURIComponent(req.url).replace(`/${urlFileRouter}/`, '')
+        const path = req.url.replace(`/${urlFileRouter}/`, '')
         const pathArr = path.split('/')
         const { content } = req.body
         const isLife = await checkFile(pathArr)
@@ -95,9 +96,9 @@ export const rename = async (req, res) => {
                 .status(400)
                 .json({ message: 'Файл не создан', errors: errors })
         }
-        const path = decodeURIComponent(req.url).replace(`/rename/${urlFileRouter}/`, '')
+        const path = req.url.replace(`/rename/${urlFileRouter}/`, '')
         let { name } = req.body
-
+        name = transliterateRu(name)
         const dir = path.split('/')
         dir.pop()
         const isLife = await checkFile([...dir, name])
@@ -119,7 +120,7 @@ export const remove = async (req, res) => {
                 .status(400)
                 .json({ message: 'Файл не создан', errors: errors })
         }
-        const path = decodeURIComponent(req.url).replace(`/${urlFileRouter}/`, '')
+        const path = req.url.replace(`/${urlFileRouter}/`, '')
         const result = await removeFile(path.split('/'))
         return res.json(result)
     } catch (e) {
